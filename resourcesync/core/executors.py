@@ -328,6 +328,7 @@ class Executor(Observable, metaclass=ABCMeta):
 
         return generator
 
+    """
     def walk_directories(self, *directories) -> [str]:
         for directory in directories:
             abs_dir = os.path.abspath(directory)
@@ -336,6 +337,7 @@ class Executor(Observable, metaclass=ABCMeta):
                 for filename in _filenames:
                     file = os.path.join(root, filename)
                     yield file
+    """
 
     def find_ordinal(self, capability):
         rs_files = sorted(glob(self.param.abs_metadata_path(capability + "_*.xml")))

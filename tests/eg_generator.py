@@ -11,9 +11,6 @@ from resync import Resource
 
 class EgGenerator(Generator):
 
-    def __init__(self, params, rsxml=None):
-        Generator.__init__(self, params, rsxml=rsxml)
-
     def generate(self):
 
         url = "http://www.resourcesync.org"
