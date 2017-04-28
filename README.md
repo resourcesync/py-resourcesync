@@ -34,9 +34,9 @@ $ python setup.py install
 
 `py-resourcesync` will have to be provided with the necessary metadata 
  of the resources in a server so that it can generate 
-the appropriate ResourceSync documents. For this purpose, the library provides a plugin like 
+the appropriate ResourceSync documents. For this purpose, the library provides a plugin-like 
  interface so that the user can hook up any source of metadata with `py-resourcesync`. The 
- metadata source could be a filesystem, a database like MySQL or elasticsearch, or an OAI-PMH 
+ metadata source could be a filesystem, a database like MySQL or elasticsearch, an OAI-PMH 
  endpoint, or a REST API. This plugin interface is called a `Generator`, and 
  Generators for common metadata stores like the ones mentioned above will be implemented in the near future. 
  
@@ -60,7 +60,7 @@ Once the Generator plugin is hooked up to provide the resource metadata to the l
 >>> rs.execute()
 ```
 
-The execute method will in-turn invoke the `generate()` method of the 
+The execute method will in turn invoke the `generate()` method of the 
 `EgGenerator` and obtain the list of resource metadata.
 
 The library can be told what type of ResourceSync document to produce by 
