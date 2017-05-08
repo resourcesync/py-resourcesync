@@ -25,9 +25,11 @@ the necessary sitemap-documents that describe the resources and the changes.
 
 Clone or downoad the source code and issue the install
 command from the root directory of this project.
+
+**Note**: This library requires Python 3 and is not compatible with Python 2.\* .
 ```
 $ cd your/path/to/py-resourcesync
-$ python setup.py install
+$ python3 setup.py install
 ```
 
 ### Resource Metadata
