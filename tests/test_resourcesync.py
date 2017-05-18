@@ -4,6 +4,11 @@ import unittest
 from hashlib import md5
 from resync import Resource
 from resourcesync.resourcesync import ResourceSync
+import logging
+
+
+#logging.getLogger(__name__)
+#logging.basicConfig(level=logging.DEBUG)
 
 
 class TestReSync(ResourceSync):
@@ -37,9 +42,23 @@ class ResourceSyncTest(unittest.TestCase):
         rs.execute()
 
     def test_gen_not_impl(self):
-        rs = ResourceSync(generator="Generator")
+        rs = ResourceSync(generator="NoGenerator")
         with self.assertRaises(NotImplementedError):
             rs.execute()
+
+    def test_new_params(self):
+        rs = ResourceSync(new_param="blahblah")
+        assert rs.params.new_param == "blahblah"
+
+    def test_new_params_persistence(self):
+        rs = ResourceSync(new_param="blahblah")
+        rs.params.save_configuration(True)
+
+        with open(rs.params.config_file, "rb") as f:
+            params = f.read()
+            assert b"new_param = blahblah" in params
+
+
 
 if __name__ == "__main__":
     unittest.main()

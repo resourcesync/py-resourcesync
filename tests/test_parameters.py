@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#from .context import Configuration
 from resourcesync.parameters.parameters import Parameters
 import unittest
+import logging
+
+#logging.getLogger(__name__)
+#logging.basicConfig(level=logging.DEBUG)
 
 
 class ParametersTest(unittest.TestCase):
@@ -17,6 +20,10 @@ class ParametersTest(unittest.TestCase):
         #assert params.generator is not None
         assert params.max_items_in_list > 0
         assert params.zero_fill_filename > 0
+
+    def test_kwargs(self):
+        params = Parameters(new_param="ss")
+        assert params.new_param == 'ss'
 
     def test_defaults(self):
         #with self.assertRaises(ValueError):
@@ -92,15 +99,14 @@ class ParametersTest(unittest.TestCase):
         Parameters(strategy="resourcelist")
         Parameters(strategy="new_changelist")
         Parameters(strategy="inc_changelist")
+        # id strategy is none, the default will be picked
+        Parameters(strategy=None)
 
         with self.assertRaises(ValueError):
             Parameters(strategy="sfasdadasdsa")
 
         with self.assertRaises(ValueError):
             Parameters(strategy=100)
-
-        with self.assertRaises(ValueError):
-            Parameters(strategy=None)
 
     def test_generator(self):
         Parameters(generator="EgGenerator")
@@ -110,12 +116,13 @@ class ParametersTest(unittest.TestCase):
 
     def test_max_items_in_list(self):
         Parameters(max_items_in_list=1000)
+        Parameters(max_items_in_list=None)
 
         with self.assertRaises(ValueError):
             Parameters(max_items_in_list=100000)
 
         with self.assertRaises(ValueError):
-            Parameters(max_items_in_list=None)
+            Parameters(max_items_in_list="ssssss")
 
     def test_zero_fill_filename(self):
         Parameters(zero_fill_filename=2)

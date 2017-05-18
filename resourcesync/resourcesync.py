@@ -124,7 +124,6 @@ class ResourceSync(Observable):
     def __init__(self, **kwargs):
         self.rsxml = RsXML()
         Observable.__init__(self)
-        #Parameters.__init__(self, **kwargs)
         self.params = Parameters(**kwargs)
         LOG.debug("ResourceSync initialized with the configuration provided.")
 

@@ -5,8 +5,8 @@ import unittest
 import logging
 
 
-LOG = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+#LOG = logging.getLogger(__name__)
+#logging.basicConfig(level=logging.DEBUG)
 
 
 class EgGeneratorTest(unittest.TestCase):

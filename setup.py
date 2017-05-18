@@ -80,6 +80,6 @@ setup(
     license=license,
     zip_safe=False,
     packages=find_packages(exclude=("tests", "docs")),
-    install_requires=["validators", "attrs", "resync"],
+    install_requires=["validators", "resync"],
     test_requires=["pytest"]
 )

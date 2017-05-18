@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import validators
-import attr
-import attr.validators
-from attr.validators import instance_of, optional
 import os
 import urllib.parse
 from resourcesync.parameters.enum import Strategy
@@ -122,6 +119,8 @@ class ParameterUtils(object):
     @staticmethod
     def _assert_directory(path, arg):
         assert isinstance(path, str)
+        if path == "~":
+            path = os.path.expanduser(path)
         if not os.path.isabs(path):
             path = os.path.abspath(path)
         if not os.path.exists(path):
@@ -210,15 +209,14 @@ class ParameterUtils(object):
         return path
 
     @staticmethod
-    def assert_max_items_in_list(instance, attr_name, max_items):
+    def assert_max_items_in_list(max_items):
         return ParameterUtils._assert_max_number(max_items, 1, 50000, "max_items_in_list")
 
     @staticmethod
-    def assert_zero_fill_filename_range(instance, attr_name, zfill):
+    def assert_zero_fill_filename_range(zfill):
         return ParameterUtils._assert_max_number(zfill, 1, 10, "zero_fill_filename")
 
 
-@attr.s()
 class Parameters(object):
     """
     :samp: Handles the parameters necessary for generating and publishing ResoruceSync documents.
@@ -411,92 +409,117 @@ class Parameters(object):
     :raises: :exc:`ValueError` if a parameter is not valid or if the configuration with the given `config_name` is not found
 """
 
-    config_name = attr.ib(default=None, validator=optional(instance_of(str)))
-    resource_dir = attr.ib(default=os.path.expanduser("~"),
-                           convert=ParameterUtils.get_resource_dir)
-    metadata_dir = attr.ib(default="metadata", convert=ParameterUtils.get_metadata_dir)
-    description_dir = attr.ib(default=None, convert=ParameterUtils.get_description_dir)
-    url_prefix = attr.ib(default="http://www.example.com", convert=ParameterUtils.get_url_prefix)
-    document_root = attr.ib(default="/var/www/html", convert=ParameterUtils.get_document_root)
-    strategy = attr.ib(default=Strategy.resourcelist.name,
-                       convert=ParameterUtils.get_strategy,
-                       metadata={"type": ["int", "str"]})
-    generator = attr.ib(default=None, validator=optional(instance_of(str)))
-    plugin_dir = attr.ib(default=None, convert=ParameterUtils.get_plugin_dir)
-    history_dir = attr.ib(default=None, convert=ParameterUtils.get_history_dir)
-    max_items_in_list = attr.ib(default=50000,
-                                validator=ParameterUtils.assert_max_items_in_list,
-                                metadata={"type": ["int"]})
-    zero_fill_filename = attr.ib(default=4,
-                                 validator=ParameterUtils.assert_zero_fill_filename_range,
-                                 metadata={"type": ["int"]})
-    is_saving_pretty_xml = attr.ib(default=True, validator=instance_of(bool),
-                                   metadata={"type": ["bool"]})
-    is_saving_sitemaps = attr.ib(default=True, validator=instance_of(bool),
-                                 metadata={"type": ["bool"]})
-    has_wellknown_at_root = attr.ib(default=True, validator=instance_of(bool),
-                                    metadata={"type": ["bool"]})
-
-    def __convert_and_validate(self, attr_field, key, value):
-        if attr_field.convert is not None:
-            fvalue = attr_field.convert(value)
-        else:
-            fvalue = value
-        if attr_field.validator is not None:
-            #Configuration.__get__logger().debug("Validating attribute %s by invoking %s" % (key, repr(field.validator)))
-            #attr_field.validator(self, attr_field.name, fvalue)
-            attr_field.validator(self, attr_field, fvalue)
-        return fvalue
-
-    def __attrs_post_init__(self):
-        if self.config_name:
-            Parameters.__get__logger().debug("Updating config from file.")
-            for field in attr.fields(Parameters):
-                value = None
-
-                if field.metadata and "int" in field.metadata["type"]:
-                    try:
-                        value = self.parser.getint(SECTION_CORE, field.name, fallback=field.default)
-                    except ValueError:
-                        pass
-                elif field.metadata and "bool" in field.metadata["type"]:
-                    try:
-                        value = self.parser.getboolean(SECTION_CORE, field.name, fallback=field.default)
-                    except ValueError:
-                        pass
-                if not value:
-                    value = self.parser.get(SECTION_CORE, field.name, fallback=field.default)
-                #Configuration.__get__logger().debug("Config File: %s: %s type(%s)" % (field.name, value, type(value)))
-                fvalue = self.__convert_and_validate(field, field.name, value)
-                #Configuration.__get__logger().debug("Config File: %s: %s type(%s)" % (field.name, fvalue, type(fvalue)))
-                self.__dict__[field.name] = fvalue
-        """
-        if self.config_name:
-            cfg = Configurations.load_configuration(self.config_name)
-            for f in attr.fields(Configuration):
-                if self.__dict__.get(f.name) is None:
-                    self.__dict__[f.name] = cfg.parser.get(SECTION_CORE, f.name, fallback=f.default)
-        """
-
-    def __setattr__(self, key, value):
-        Parameters.__get__logger().debug("Setting attribute %s with value %s" % (key, value))
-        field = None
-        for f in attr.fields(Parameters):
-            if f.name == key:
-                field = f
-                break
-
-        if field:
-            fvalue = self.__convert_and_validate(field, key, value)
-            self.__dict__[key] = fvalue
-            #Configuration.__get__logger().debug("Value %s set for attr key %s" % (value, key))
-        else:
-            self.__dict__[key] = value
-            #Configuration.__get__logger().debug("Value %s set for key %s" % (value, key))
-        #Configuration.__get__logger().debug("")
-
     _instance = None
     _configuration_filename = CFG_FILENAME
+
+    def __init__(self, **kwargs):
+        self.__dict__["param_dict"] = {}
+        self.param_dict = {}
+        self.__init_param("config_name", default=None, convert=None, validator=None,
+                          metadata={"type": ["str"]}, **kwargs)
+        self.__init_param("resource_dir", default="~", convert=ParameterUtils.get_resource_dir,
+                          validator=None, metadata=None, **kwargs)
+        self.__init_param("metadata_dir", default="metadata", convert=ParameterUtils.get_metadata_dir,
+                          validator=None, metadata=None, **kwargs)
+        self.__init_param("description_dir", default=None, convert=ParameterUtils.get_description_dir,
+                          validator=None, metadata=None, **kwargs)
+        self.__init_param("url_prefix", default="http://www.example.com", convert=ParameterUtils.get_url_prefix,
+                          validator=None, metadata=None, **kwargs)
+        self.__init_param("document_root", default="/var/www/html", convert=ParameterUtils.get_document_root,
+                          validator=None, metadata=None, **kwargs)
+        self.__init_param("strategy", default=Strategy.resourcelist.name, convert=ParameterUtils.get_strategy,
+                          validator=None, metadata=None, **kwargs)
+        self.__init_param("generator", default=None, convert=None, validator=None,
+                          metadata={"type": ["str"]}, **kwargs)
+        self.__init_param("plugin_dir", default=None, convert=ParameterUtils.get_plugin_dir,
+                          validator=None, metadata=None, **kwargs)
+        self.__init_param("history_dir", default=None, convert=ParameterUtils.get_history_dir,
+                          validator=None, metadata=None, **kwargs)
+        self.__init_param("max_items_in_list", default=50000, convert=None,
+                          validator=ParameterUtils.assert_max_items_in_list,
+                          metadata={"type": ["int"]}, **kwargs)
+        self.__init_param("zero_fill_filename", default=4, convert=None,
+                          validator=ParameterUtils.assert_zero_fill_filename_range,
+                          metadata={"type": ["int"]}, **kwargs)
+        self.__init_param("is_saving_pretty_xml", default=True, convert=None,
+                          validator=None, metadata={"type": ["bool"]}, **kwargs)
+        self.__init_param("is_saving_sitemaps", default=True, convert=None,
+                          validator=None, metadata={"type": ["bool"]}, **kwargs)
+        self.__init_param("has_wellknown_at_root", default=True, convert=None,
+                          validator=None, metadata={"type": ["bool"]}, **kwargs)
+        for key, value in kwargs.items():
+            if key not in self.param_dict:
+                self.__init_param(key, default=value, convert=None, validator=None, metadata=None, **kwargs)
+
+        self.__update_from_config_file()
+
+    def __init_param(self, name, default=None, convert=None, validator=None, metadata=None,
+                     **kwargs):
+
+        self.param_dict[name] = {
+            "default": kwargs.get(name) if kwargs.get(name) is not None else default,
+            "convert": convert,
+            "validator": validator,
+            "metadata": metadata
+        }
+        logging.debug("param_dict set for %s\n%s" % (name, self.param_dict.get(name)))
+        setattr(self, name, self.param_dict[name].get("default"))
+
+    def __update_from_config_file(self):
+        if not self.config_name:
+            return
+
+        Parameters.__get__logger().debug("Updating config from file.")
+        for field, param in self.param_dict.items():
+            value = None
+            if param.get("metadata") and "int" in param.get("metadata").get("type"):
+                try:
+                    value = self.parser.getint(SECTION_CORE, field, fallback=param.get("default"))
+                except ValueError:
+                    pass
+            elif param.get("metadata") and "bool" in param.get("metadata").get("type"):
+                try:
+                    value = self.parser.getboolean(SECTION_CORE, field, fallback=param.get("default"))
+                except ValueError:
+                    pass
+            if not value:
+                value = self.parser.get(SECTION_CORE, field, fallback=param.get("default"))
+            fvalue = self.__convert_and_validate(param, value)
+            self.__dict__[field] = fvalue
+
+    def __convert_and_validate(self, param, value):
+        if param.get("convert") is not None:
+            fvalue = param.get("convert")(value)
+        else:
+            fvalue = value
+        if param.get("validator") is not None:
+            param.get("validator")(fvalue)
+        elif param.get("metadata") and param.get("metadata").get("type"):
+            if "bool" in param.get("metadata").get("type"):
+                if not isinstance(fvalue, bool):
+                    raise TypeError
+            elif "int" in param.get("metadata").get("type"):
+                if not isinstance(fvalue, int):
+                    raise TypeError
+            elif "str" in param.get("metadata").get("type") and fvalue:
+                if not isinstance(fvalue, str):
+                    raise TypeError
+        return fvalue
+
+    def __setattr__(self, key, value):
+        if not self.__dict__.get("param_dict"):
+            logging.debug("param_dict not set")
+            return
+        Parameters.__get__logger().debug("Setting attribute %s" % key)
+        field = self.param_dict.get(key)
+
+        if field:
+            fvalue = self.__convert_and_validate(field, value)
+            self.__dict__[key] = fvalue
+            Parameters.__get__logger().debug("Setting attribute %s with value %s" % (key, fvalue))
+        else:
+            self.__dict__[key] = value
+            Parameters.__get__logger().debug("Setting attribute %s with value %s" % (key, value))
 
     @staticmethod
     def __get__logger():
@@ -729,16 +752,16 @@ class Parameters(object):
 
         if not self.parser.has_section(SECTION_CORE):
             self.parser.add_section(SECTION_CORE)
-        for f in attr.fields(Parameters):
-            if self.__dict__.get(f.name) is None:
-                self.parser.remove_option(SECTION_CORE, f.name)
+        for f, p in self.param_dict.items():
+            if self.__dict__.get(f) is None:
+                self.parser.remove_option(SECTION_CORE, f)
             else:
-                val = self.__dict__.get(f.name)
+                val = self.__dict__.get(f)
                 if isinstance(val, Strategy):
                     val = val.name
                 elif type(val) is not str:
                     val = str(val)
-                self.parser.set(SECTION_CORE, f.name, val)
+                self.parser.set(SECTION_CORE, f, val)
 
         if on_disk:
             self.persist()
