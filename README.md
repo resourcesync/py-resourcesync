@@ -25,23 +25,26 @@ the necessary sitemap-documents that describe the resources and the changes.
 
 Clone or downoad the source code and issue the install
 command from the root directory of this project.
+
+**Note**: This library requires Python 3 and is not compatible with Python 2.\* .
 ```
 $ cd your/path/to/py-resourcesync
-$ python setup.py install
+$ python3 setup.py install
 ```
 
 ### Resource Metadata
 
 `py-resourcesync` will have to be provided with the necessary metadata 
  of the resources in a server so that it can generate 
-the appropriate ResourceSync documents. For this purpose, the library provides a plugin like 
+the appropriate ResourceSync documents. For this purpose, the library provides a plugin-like 
  interface so that the user can hook up any source of metadata with `py-resourcesync`. The 
- metadata source could be a filesystem, a database like MySQL or elasticsearch, or an OAI-PMH 
+ metadata source could be a filesystem, a database like MySQL or elasticsearch, an OAI-PMH 
  endpoint, or a REST API. This plugin interface is called a `Generator`, and 
  Generators for common metadata stores like the ones mentioned above will be implemented in the near future. 
  
  A very basic example is provided in the [`EgGenerator`](resourcesync/generators/eg_generator.py) 
- class that shows how a plugin can be implemented. The generator will have to sub-class the 
+ class that shows how a plugin can be implemented. The generator plugin file will have to be present in the 
+ [`Generator`](resourcesync/generators/) directory. The generator will have to sub-class the 
  `Generator` class and must implement the `generate` method. The `generate` method must return 
  an iterable or an iterator of 
  [resync/Resource](https://github.com/resync/resync/blob/master/resync/resource.py) instances.
@@ -59,7 +62,7 @@ Once the Generator plugin is hooked up to provide the resource metadata to the l
 >>> rs.execute()
 ```
 
-The execute method will in-turn invoke the `generate()` method of the 
+The execute method will in turn invoke the `generate()` method of the 
 `EgGenerator` and obtain the list of resource metadata.
 
 The library can be told what type of ResourceSync document to produce by 
