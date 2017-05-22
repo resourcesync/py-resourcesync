@@ -159,7 +159,7 @@ class ResourceSync(Observable):
         LOG.debug("Generator found. Obtaining resources.")
         resource_metadata = generator.generate()
 
-        if not resource_metadata or len(resource_metadata) == 0:
+        if not resource_metadata:
             # is returning no metadata an error?
             LOG.warning("Generator returned an empty list of resource metadata")
             return
