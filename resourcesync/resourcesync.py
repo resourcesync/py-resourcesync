@@ -109,7 +109,7 @@ from resourcesync.rsxml.rsxml import RsXML
 from resourcesync.parameters.enum import Strategy
 from resourcesync.executor.resourcelist import ResourceListExecutor
 from resourcesync.executor.changelist import IncrementalChangeListExecutor, NewChangeListExecutor
-from resourcesync.core.generator import get_generator
+from resourcesync.core.generator import Generator
 from resourcesync.parameters.parameters import Parameters
 
 
@@ -121,11 +121,24 @@ class ResourceSync(Observable):
     :samp: Main class for publishing ResourceSync documents.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, generator=None, **kwargs):
         self.rsxml = RsXML()
         Observable.__init__(self)
         self.params = Parameters(**kwargs)
         LOG.debug("ResourceSync initialized with the configuration provided.")
+        self._generator = None
+        self.set_generator(generator)
+
+    def get_generator(self):
+        return self._generator
+
+    def set_generator(self, generator):
+        if not generator:
+            return
+        assert isinstance(generator, Generator)
+        self._generator = generator
+
+    generator = property(get_generator, set_generator)
 
     def execute(self):
 
@@ -150,14 +163,10 @@ class ResourceSync(Observable):
 
     def get_resource_list(self):
 
-        generator_name = self.params.generator
-        LOG.debug("Generator name provided in the configuration: %s" % generator_name)
-        Generator = get_generator(generator_name)
-        if not Generator:
-            raise NotImplementedError("No Generator found with name: %s" % generator_name)
-        generator = Generator(self.params)
-        LOG.debug("Generator found. Obtaining resources.")
-        resource_metadata = generator.generate()
+        if not self.generator:
+            raise ValueError("No generator found.")
+
+        resource_metadata = self.generator.generate()
 
         if not resource_metadata:
             # is returning no metadata an error?

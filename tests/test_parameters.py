@@ -17,7 +17,6 @@ class ParametersTest(unittest.TestCase):
         assert params.url_prefix is not None
         assert params.document_root is not None
         assert params.strategy is not None
-        #assert params.generator is not None
         assert params.max_items_in_list > 0
         assert params.zero_fill_filename > 0
 
@@ -26,9 +25,6 @@ class ParametersTest(unittest.TestCase):
         assert params.new_param == 'ss'
 
     def test_defaults(self):
-        #with self.assertRaises(ValueError):
-        #    params = Parameters(generator="Generator")
-
         params = Parameters()
         self.assert_params(params)
 
@@ -107,12 +103,6 @@ class ParametersTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             Parameters(strategy=100)
-
-    def test_generator(self):
-        Parameters(generator="EgGenerator")
-
-        with self.assertRaises(TypeError):
-            Parameters(generator=1111)
 
     def test_max_items_in_list(self):
         Parameters(max_items_in_list=1000)

@@ -346,11 +346,6 @@ class Parameters(object):
         If strategies new resourcelist or incremental changelist are chosen and there is no previous resourcelist
         found in the metadata directory the strategy :attr:`~rspub.core.rs_enum.Strategy.resourcelist` will be executed.
         ``default:`` :attr:`rspub.core.rs_enum.Strategy.resourcelist`
-    :param str generator: ``parameter`` :param:`generator`
-        ``parameter`` :samp: `Generator for ResourceSync publishing` (str)
-
-        The `generator` is the class name of the pluggable component responsible for providing metadata items
-          (the data in the element url of an urlset).
     :param str plugin_dir: ``parameter`` :param:`plugin_dir`
         ``parameter`` :samp:`Directory where plugins can be found` (str)
 
@@ -429,8 +424,6 @@ class Parameters(object):
                           validator=None, metadata=None, **kwargs)
         self.__init_param("strategy", default=Strategy.resourcelist.name, convert=ParameterUtils.get_strategy,
                           validator=None, metadata=None, **kwargs)
-        self.__init_param("generator", default=None, convert=None, validator=None,
-                          metadata={"type": ["str"]}, **kwargs)
         self.__init_param("plugin_dir", default=None, convert=ParameterUtils.get_plugin_dir,
                           validator=None, metadata=None, **kwargs)
         self.__init_param("history_dir", default=None, convert=ParameterUtils.get_history_dir,
@@ -711,7 +704,6 @@ class Parameters(object):
             [False, "description_url", self.description_url()],
             [False, "capabilitylist_url", self.capabilitylist_url()],
             [True, "strategy", self.strategy, self.strategy.describe()],
-            [True, "generator", self.generator, self.generator.__class__],
             [True, "plugin_dir", self.plugin_dir],
             [True, "max_items_in_list", self.max_items_in_list],
             [True, "zero_fill_filename", self.zero_fill_filename],

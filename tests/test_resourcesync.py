@@ -4,6 +4,8 @@ import unittest
 from hashlib import md5
 from resync import Resource
 from resourcesync.resourcesync import ResourceSync
+from resourcesync.core.generator import Generator
+from resourcesync.generators.eg_generator import EgGenerator
 import logging
 
 
@@ -26,23 +28,29 @@ class TestReSync(ResourceSync):
         )
         return [rm]
 
+eg_gen = EgGenerator()
+
 
 class ResourceSyncTest(unittest.TestCase):
 
     def test_resourcelist(self):
-        rs = TestReSync(generator="EgGenerator", strategy=0)
+        rs = TestReSync(generator=eg_gen, strategy=0)
         rs.execute()
 
     def test_newchangelist(self):
-        rs = TestReSync(generator="EgGenerator", strategy=1)
+        rs = TestReSync(generator=eg_gen, strategy=1)
         rs.execute()
 
     def test_incchangelist(self):
-        rs = TestReSync(generator="EgGenerator", strategy=2)
+        rs = TestReSync(generator=eg_gen, strategy=2)
         rs.execute()
 
     def test_gen_not_impl(self):
-        rs = ResourceSync(generator="NoGenerator")
+        class NoGenerator(Generator):
+            def __init__(self):
+                pass
+        nogen = NoGenerator()
+        rs = ResourceSync(generator=nogen)
         with self.assertRaises(NotImplementedError):
             rs.execute()
 

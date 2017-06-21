@@ -14,7 +14,6 @@ class GeneratorTest(unittest.TestCase):
         assert isinstance(gen, Generator)
         with self.assertRaises(NotImplementedError):
             gen.generate()
-        assert len(Generator.plugins) > 0
 
 
 if __name__ == "__main__":
