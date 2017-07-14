@@ -1,4 +1,4 @@
-# py-resourcesync [![Build Status](https://travis-ci.org/resourcesync/py-resourcesync.svg?branch=master)]
+# py-resourcesync ![Build Status](https://travis-ci.org/resourcesync/py-resourcesync.svg?branch=master)
 
 
 Core Python library for ResourceSync publishing
