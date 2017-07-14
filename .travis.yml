@@ -1,0 +1,14 @@
+language: python
+cache: # caching is only available for customers who pay
+    directories:
+        - $HOME/.cache/pip
+python:
+    - "3.6"
+install:
+    - "pip install ."
+script:
+    - python setup.py test
+    - python setup.py sdist
+branches:
+    only:
+        - master
