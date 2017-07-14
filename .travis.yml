@@ -3,6 +3,7 @@ cache: # caching is only available for customers who pay
     directories:
         - $HOME/.cache/pip
 python:
+    - "3.5"
     - "3.6"
 install:
     - "pip install ."
