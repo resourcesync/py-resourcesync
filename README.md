@@ -159,3 +159,70 @@ by your site.
 `is_saving_sitemaps`: Determines if sitemaps will be written to disk (bool)
 
 `has_wellknown_at_root`: Where is the description document {.well-known/resourcesync} on the server (bool)
+
+
+## OAI-PMH Generator
+
+An OAI-PMH generator for py-resourcesync exists in `resourcesync/generators`, allowing institutions to bootstrap a ResourceSync-compatible repository using their existing OAI-PMH repository.
+
+The code snippets below use filesystem paths for institutions that will be using `httpd` to serve their ResourceSync documents.
+
+### Installation
+
+In addition to the setup instructions [above](#installation-from-source), do the following:
+
+```bash
+$ pip3 install beautifulsoup4 Sickle validators
+```
+
+#### Testing
+
+In order to run the tests for this generator, you'll also need to do:
+
+```bash
+$ pip3 install requests-mock
+```
+
+### Usage
+
+There must exist a directory at the path specified by `resource_dir`. For `httpd`:
+
+```bash
+$ mkdir /var/www/html/resourcesync/ # create a place for the ResourceSync documents
+```
+
+Then, with Python:
+
+```python
+from resourcesync.resourcesync import ResourceSync
+from resourcesync.generators.oaipmh_generator import OAIPMHGenerator
+
+httpd_document_root = '/var/www/html'
+resource_dir = 'resourcesync'
+collection_name = 'test'
+resourcesync_url = 'http://your-resourcecync-server.edu'
+
+# your-oaipmh-server may be the same as your-resourcesync-server
+oaipmh_base_url = 'http://your-oaipmh-server.edu/oai/provider'
+
+oaipmh_set = collection_name # or None, if the "set" parameter is not used in
+                             # the query string for ListIdentifiers and
+                             # ListRecords requests (i.e., each record set
+                             # has a distinct base URL)
+
+oaipmh_metadataprefix = 'oai_dc'
+
+my_generator = OAIPMHGenerator(params={
+    'oaipmh_base_url':       oaipmh_base_url,
+    'oaipmh_set':            oaipmh_set,
+    'oaipmh_metadataprefix': oaipmh_metadataprefix})
+
+rs = ResourceSync(generator=my_generator,
+                  strategy=0,
+                  resource_dir='{}/{}'.format(httpd_document_root, resource_dir),
+                  metadata_dir=collection_name,
+                  description_dir=httpd_document_root,
+                  url_prefix='{}/{}'.format(resourcesync_url, resource_dir),
+                  is_saving_sitemaps=True)
+rs.execute()
+```
