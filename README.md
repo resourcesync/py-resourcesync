@@ -226,3 +226,79 @@ rs = ResourceSync(generator=my_generator,
                   is_saving_sitemaps=True)
 rs.execute()
 ```
+
+
+## Solr Generator
+
+There is a generator for Apache Solr for py-resourcesync in `resourcesync/generators`. As with the OAI-PMH generator, the intent is to make it easier for institutions which may have indexed metadata using Solr, to bootstrap a ResourceSync-compatible repository.
+
+The code snippets below use filesystem paths for institutions that will be using `httpd` to serve their ResourceSync documents.
+
+### Installation
+
+No additional libraries or installation steps are required.
+
+#### Testing
+
+Currently no tests are available.
+
+### Usage
+
+There must exist a directory at the path specified by `resource_dir`. For `httpd`:
+
+```bash
+$ mkdir /var/www/html/resourcesync/ # create a place for the ResourceSync documents
+```
+
+Then, with Python:
+
+```python
+from resourcesync.resourcesync import ResourceSync
+from resourcesync.generators.solr_generator import SolrGenerator
+
+httpd_document_root = '/var/www/html'
+resource_dir = 'resourcesync'
+collection_name = 'test'
+resourcesync_url = 'http://your-resourcecync-server.edu'
+
+solr_base_url         = 'http://solr-server.edu/solr/some-collection/select?q='
+solr_query            = '*'
+solr_params           = '&wt=python&sort=recID+asc&cursorMark=_*_'
+metadata_element      = 'recID'
+metadata_disseminator = ''
+time_element          = 'timestamp'
+metadata_type         = 'dc'
+
+solr_generator_params = {
+            "solr_base_url":         solr_base_url,
+            "solr_query":            solr_query,
+            "solr_params":           solr_params,
+            "metadata_identifier":   metadata_element,
+            "metadata_disseminator": metadata_disseminator,
+            "metadata_timestamp":    time_element,
+            "metadata_type":         metadata_type}
+
+s_generator = SolrGenerator(params=solr_generator_params)
+
+rs = ResourceSync(generator=s_generator,
+                  strategy=0,
+                  resource_dir='{}/{}'.format(httpd_document_root, resource_dir),
+                  metadata_dir=collection_name,
+                  description_dir=httpd_document_root,
+                  url_prefix='{}/{}'.format(resourcesync_url, resource_dir),
+                  is_saving_sitemaps=True)
+rs.execute()
+```
+
+### Notes
+
+The Solr generator has been tested with Solr 5.x and Solr 6.1.0. The Solr generator parameters listed above correspond to labels for fields in the Solr result set. These will in all probability differ for different Solr installations. You will need to look at the raw Python-formatted output for some sample queries for the Solr instance you intend to make available via py-resourcesync to determine appropriate values.
+
+There are a few things to be aware of: 
+
+1. The Solr generator expects the Solr results set to be Python formatted (wt=python parameter)
+2. The Solr generator cannot handle a multi-value date field. The timestamp label specified above should be associated with a single value per record. Out of the box, some instances of Solr generate dynamic multi-value timestamp fields by default.
+3. metadata_type is not currently used
+4. metadata_disseminator is only required when the metadata_element field contains a record identifier that requires a base URL before it can be resolved. If metadata_element contains full URLs, leave metadata_disseminator blank.
+5. solr_query can be as simple as a wildcard or can reference a collection, specify a date range, etc. Refer to the documentation for the version of Solr you are running or use Solr admin to generate and test your query.
+6. You will need to change part of the solr_params value so that the value for the Solr sort parameter corresponds to an indexed field in your instance of Solr.
