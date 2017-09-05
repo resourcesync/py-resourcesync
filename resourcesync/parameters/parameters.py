@@ -164,18 +164,14 @@ class ParameterUtils(object):
         if value.endswith("/"):
             value = value[:-1]
         parts = urllib.parse.urlparse(value)
-        if parts[0] not in ["http", "https"]:  # scheme
+        if parts.scheme not in ["http", "https"]:  # scheme
             raise ValueError("URL schemes allowed are 'http' or 'https'. Given: '%s'" % value)
-        is_valid_domain = validators.domain(parts[1])  # netloc
-        if not is_valid_domain:
-            raise ValueError("URL has invalid domain name: '%s'. Given: '%s'" % (parts[1], value))
-        if parts[4] != "":  # query
+        if not bool(parts.netloc):
+            raise ValueError("URL has invalid domain name: '%s'. Given: '%s'" % (parts.netloc, value))
+        if bool(parts.query):  # query
             raise ValueError("URL should not have a query string. Given: '%s'" % value)
-        if parts[5] != "":  # fragment
+        if bool(parts.fragment):  # fragment
             raise ValueError("URL should not have a fragment. Given: '%s'" % value)
-        is_valid_url = validators.url(value)
-        if not is_valid_url:
-            raise ValueError("URL is invalid. Given: '%s'" % value)
         if not value.endswith("/"):
             value += "/"
         return value

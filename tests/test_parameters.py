@@ -68,17 +68,23 @@ class ParametersTest(unittest.TestCase):
         params = Parameters(url_prefix="http://www.resourcesync.org/")
         self.assert_params(params)
 
+        params = Parameters(url_prefix="http://localhost")
+        self.assert_params(params)
+
+        params = Parameters(url_prefix="http://localhost:9000")
+        self.assert_params(params)
+
+        Parameters(url_prefix="http://safsfaasdgasf")
+        self.assert_params(params)
+
         with self.assertRaises(ValueError):
             Parameters(url_prefix="//www.resourcesync.org")
-
         with self.assertRaises(ValueError):
-            Parameters(url_prefix="http://safsfaasdgasf")
-
+            Parameters(url_prefix="ftp://www.resourcesync.org")
         with self.assertRaises(ValueError):
-            Parameters(url_prefix="http://localhost")
-
+            Parameters(url_prefix="http://www.resourcesync.org/#fragments")
         with self.assertRaises(ValueError):
-            Parameters(url_prefix="http://:9000")
+            Parameters(url_prefix="http://www.resourcesync.org?query=parameters")
 
     def test_document_root(self):
         params = Parameters(document_root="/var/www/html")

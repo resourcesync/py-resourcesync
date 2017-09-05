@@ -71,7 +71,7 @@ with open("LICENSE") as f:
 
 setup(
     name="resourcesync",
-    version="0.1.1",
+    version="0.1.2",
     description="A library for creating various ResourceSync (http://www.openarchives.org/rs/1.0.9/resourcesync)"
                 " documents for the Source",
     long_description=readme,
@@ -80,6 +80,6 @@ setup(
     license=license,
     zip_safe=False,
     packages=find_packages(exclude=("tests", "docs")),
-    install_requires=["validators", "resync"],
-    test_requires=["pytest"]
+    install_requires=["validators", "resync", "bs4", "sickle"],
+    test_requires=["pytest", "bs4", "sickle", "requests_mock"]
 )
