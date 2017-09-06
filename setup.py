@@ -80,6 +80,6 @@ setup(
     license=license,
     zip_safe=False,
     packages=find_packages(exclude=("tests", "docs")),
-    install_requires=["validators", "resync", "bs4", "sickle"],
-    test_requires=["pytest", "bs4", "sickle", "requests_mock"]
+    install_requires=["validators", "resync", "bs4", "sickle", "elasticsearch>=1.0.0,<2.0.0"],
+    test_requires=["pytest", "bs4", "sickle", "requests_mock", "elasticsearch>=1.0.0,<2.0.0", "urllib3_mock"]
 )

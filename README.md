@@ -1,4 +1,4 @@
-# py-resourcesync ![Build Status](https://travis-ci.org/resourcesync/py-resourcesync.svg?branch=master)
+# py-resourcesync [![Build Status](https://travis-ci.org/resourcesync/py-resourcesync.svg?branch=master)](https://travis-ci.org/resourcesync/py-resourcesync)
 
 
 Core Python library for ResourceSync publishing
@@ -302,3 +302,79 @@ There are a few things to be aware of:
 4. metadata_disseminator is only required when the metadata_element field contains a record identifier that requires a base URL before it can be resolved. If metadata_element contains full URLs, leave metadata_disseminator blank.
 5. solr_query can be as simple as a wildcard or can reference a collection, specify a date range, etc. Refer to the documentation for the version of Solr you are running or use Solr admin to generate and test your query.
 6. You will need to change part of the solr_params value so that the value for the Solr sort parameter corresponds to an indexed field in your instance of Solr.
+
+## Elasticsearch generator
+
+The [Elasticsearch generator](resourcesync/generators/elastic_generator.py) allows a flexible use of [Elasticsearch](https://www.elastic.co/) to keep track of the state of ResourceSync resources.
+Data regarding resources and their changes must be recorded in Elasticsearch according to the protocol defined in the [documentation](resourcesync/generators/elastic/README.md).
+The code snippets below use filesystem paths for institutions that will be using `httpd` to serve their ResourceSync documents.
+
+**WARNING**: this generator has been tested on Elasticsearch v1.7.5. Subsequent versions may require different mapping
+and queries.
+
+### Installation
+
+In addition to the setup instructions [above](#installation-from-source), do the following:
+```bash
+$ pip3 install 'elasticsearch>=1.0.0,<2.0.0'
+```
+
+
+#### Testing
+
+In order to run the tests for this generator, you'll also need to do:
+
+```bash
+$ pip3 install urlib3-mock
+```
+
+### Usage
+
+There must exist a directory at the path specified by `resource_dir`. For `httpd`:
+
+```bash
+$ mkdir /var/www/html/resourcesync/ # create a place for the ResourceSync documents
+```
+
+Then, with Python:
+
+```python
+from resourcesync.resourcesync import ResourceSync
+from resourcesync.generators.elastic_generator import ElasticGenerator
+
+httpd_document_root = '/var/www/html'
+resource_dir = 'resourcesync'
+collection_name = 'foo-set'
+resourcesync_url = 'http://your-resourcecync-server.edu'
+
+url_prefix = '{}/{}'.format(resourcesync_url, resource_dir),
+strategy = 0
+max_items_in_list= 1000
+
+params = {
+            "resource_set": "foo-set",
+            "resource_root_dir": "/resources/root/directory",
+            "elastic_host": "localhost",
+            "elastic_port": 9200,
+            "elastic_index": "resync-index",
+            "elastic_resource_doc_type": "resource",
+            "elastic_change_doc_type": "change",
+            "strategy": strategy,
+            "url_prefix": url_prefix,
+            "max_items_in_list": max_items_in_list
+        }
+
+
+my_generator = ElasticGenerator(params=params)
+
+rs = ResourceSync(generator=my_generator,
+                  strategy=strategy,
+                  resource_dir='{}/{}'.format(httpd_document_root, resource_dir),
+                  metadata_dir=collection_name,
+                  description_dir=httpd_document_root,
+                  url_prefix=url_prefix,
+                  max_items_in_list=max_items_in_list,
+                  is_saving_sitemaps=True)
+rs.execute()
+```
+NOTE: further details on the generator's parameters available in the documentation
