@@ -325,7 +325,7 @@ $ pip3 install 'elasticsearch>=1.0.0,<2.0.0'
 In order to run the tests for this generator, you'll also need to do:
 
 ```bash
-$ pip3 install urlib3-mock
+$ pip3 install urllib3-mock
 ```
 
 ### Usage
@@ -377,4 +377,4 @@ rs = ResourceSync(generator=my_generator,
                   is_saving_sitemaps=True)
 rs.execute()
 ```
-NOTE: further details on the generator's parameters available in the documentation
+NOTE: further details on the generator's parameters available in the [documentation](resourcesync/generators/elastic/README.md)
