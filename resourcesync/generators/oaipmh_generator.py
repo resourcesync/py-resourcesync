@@ -10,6 +10,7 @@ from resync import Resource
 from sickle import Sickle
 from requests import get
 from bs4 import BeautifulSoup
+import urllib.parse
 
 
 class OAIPMHGenerator(Generator):
@@ -54,10 +55,11 @@ class OAIPMHGenerator(Generator):
         lastmod    = soup.header.datestamp.text
         identifier = soup.identifier.text
 
-        uri = '{}?verb=GetRecord&identifier={}&metadataPrefix={}'.format(
-            self.params['oaipmh_base_url'],
-            identifier,
-            self.params['oaipmh_metadataprefix'])
+        query_string = 'verb=GetRecord&identifier={}&metadataPrefix={}'.format(
+            urllib.parse.quote(identifier, safe=''),
+            urllib.parse.quote(self.params['oaipmh_metadataprefix'], safe=''))
+        parts = urllib.parse.urlparse(self.params['oaipmh_base_url'])[:4] + (query_string, '')
+        uri = urllib.parse.urlunparse(parts)
 
         # do a GET request for each record to retrieve the 'content-length'
         r      = get(uri)
