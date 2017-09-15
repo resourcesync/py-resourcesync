@@ -27,9 +27,9 @@ class TestElasticResourceList(unittest.TestCase):
     @responses.activate
     def test_elastic_resourcelist(self):
         test_num = 0
+        url_scan = [u for u, v in elastic_mock_responses[test_num].items() if u.startswith("http://example.com:9200/resync-test/resource/_search?scroll=2m&size=2")][0]
+        url_scroll = [u for u, v in elastic_mock_responses[test_num].items() if u.startswith("http://example.com:9200/_search/scroll?scroll=2m")][0]
 
-        url_scan = list(elastic_mock_responses[test_num])[0]
-        url_scroll = list(elastic_mock_responses[test_num])[1]
         responses.add('GET', "/resync-test/resource/_search", body=elastic_mock_responses[test_num].get(url_scan), content_type='application/json', status=200)
         responses.add('GET', "/_search/scroll", body=elastic_mock_responses[test_num].get(url_scroll), content_type='application/json', status=200)
         responses.add('DELETE', "/resync-test/change/_query", content_type='application/json', status=200)
