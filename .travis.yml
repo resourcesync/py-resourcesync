@@ -9,6 +9,8 @@ install:
     - "pip install ."
     - "pip3 install beautifulsoup4 Sickle validators"
     - "pip3 install requests-mock"
+    - "pip3 install 'elasticsearch>=1.0.0,<2.0.0'"
+    - "pip3 install urllib3-mock"
 script:
     - python setup.py test
     - python setup.py sdist
