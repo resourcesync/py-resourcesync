@@ -5,11 +5,9 @@ from resync import Resource
 from resourcesync.resourcesync import ResourceSync
 from resourcesync.core.generator import Generator
 from resourcesync.generators.eg_generator import EgGenerator
-import logging
-
-
-#logging.getLogger(__name__)
-#logging.basicConfig(level=logging.DEBUG)
+from resourcesync.parameters.parameters import ParameterUtils
+import shutil
+import os
 
 
 class ChangeGenerator(Generator):
@@ -38,10 +36,16 @@ ch_gen = ChangeGenerator()
 
 class ResourceSyncTest(unittest.TestCase):
 
+    def tearDown(self):
+        try:
+            shutil.rmtree(os.path.join(ParameterUtils.get_resource_dir("~"), "test_md"))
+        except:
+            pass
+
     def test_change_list(self):
-        rs = ResourceSync(generator=eg_gen, strategy=0)
+        rs = ResourceSync(generator=eg_gen, strategy=0, metadata_dir="test_md")
         rs.execute()
-        ch_rs = ResourceSync(generator=ch_gen, strategy="new_changelist")
+        ch_rs = ResourceSync(generator=ch_gen, strategy="new_changelist", metadata_dir="test_md")
         ch_rs.execute()
 
 

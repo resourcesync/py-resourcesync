@@ -6,11 +6,9 @@ from resync import Resource
 from resourcesync.resourcesync import ResourceSync
 from resourcesync.core.generator import Generator
 from resourcesync.generators.eg_generator import EgGenerator
-import logging
-
-
-#logging.getLogger(__name__)
-#logging.basicConfig(level=logging.DEBUG)
+import shutil
+import os
+from resourcesync.parameters.parameters import ParameterUtils
 
 
 class TestReSync(ResourceSync):
@@ -28,21 +26,31 @@ class TestReSync(ResourceSync):
         )
         return [rm]
 
+
 eg_gen = EgGenerator()
 
 
 class ResourceSyncTest(unittest.TestCase):
 
+    def tearDown(self):
+        try:
+            shutil.rmtree(os.path.join(ParameterUtils.get_resource_dir("~"), "test_md"))
+        except:
+            pass
+
     def test_resourcelist(self):
-        rs = TestReSync(generator=eg_gen, strategy=0)
+        rs = TestReSync(generator=eg_gen, strategy=0,
+                        metadata_dir="test_md")
         rs.execute()
 
     def test_newchangelist(self):
-        rs = TestReSync(generator=eg_gen, strategy=1)
+        rs = TestReSync(generator=eg_gen, strategy=1,
+                        metadata_dir="test_md")
         rs.execute()
 
     def test_incchangelist(self):
-        rs = TestReSync(generator=eg_gen, strategy=2)
+        rs = TestReSync(generator=eg_gen, strategy=2,
+                        metadata_dir="test_md")
         rs.execute()
 
     def test_gen_not_impl(self):
@@ -65,7 +73,6 @@ class ResourceSyncTest(unittest.TestCase):
         with open(rs.params.config_file, "rb") as f:
             params = f.read()
             assert b"new_param = blahblah" in params
-
 
 
 if __name__ == "__main__":

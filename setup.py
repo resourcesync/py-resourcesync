@@ -71,7 +71,7 @@ with open("LICENSE") as f:
 
 setup(
     name="resourcesync",
-    version="0.1.2",
+    version="0.1.3",
     description="A library for creating various ResourceSync (http://www.openarchives.org/rs/1.0.9/resourcesync)"
                 " documents for the Source",
     long_description=readme,
