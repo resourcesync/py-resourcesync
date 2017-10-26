@@ -15,9 +15,11 @@ from resync import ChangeList
 from resync import Resource
 from resync import ResourceList
 from resync.sitemap import Sitemap
+
 from resourcesync.core.executors import Executor, SitemapData, ExecutorEvent
 from resourcesync.parameters.enum import Capability
 from resourcesync.parameters.parameters import Parameters
+from resourcesync.rsxml.rsxml import RsXML
 
 
 class ChangeListExecutor(Executor, metaclass=ABCMeta):
@@ -80,45 +82,24 @@ class ChangeListExecutor(Executor, metaclass=ABCMeta):
                 if self.date_resourcelist_completed is None:
                     self.date_resourcelist_completed = resourcelist.md_at
 
-                self.previous_resources.update({resource.uri: resource for resource in resourcelist.resources})
-
             # search for changelists
             self.changelist_files = sorted(glob(self.param.abs_metadata_path("changelist_*.xml")))
-            for cl_file_name in self.changelist_files:
-                changelist = ChangeList()
-                with open(cl_file_name, "r", encoding="utf-8") as cl_file:
-                    sm = Sitemap()
-                    sm.parse_xml(cl_file, resources=changelist)
-
-                for resource in changelist.resources:
-                    if resource.change == "created" or resource.change == "updated":
-                        self.previous_resources.update({resource.uri: resource})
-                    elif resource.change == "deleted" and resource.uri in self.previous_resources:
-                        del self.previous_resources[resource.uri]
 
     def changelist_generator(self, resource_metadata: [Resource]) -> iter:
 
         def generator(changelist=None) -> [SitemapData, ChangeList]:
-            resource_generator = self.resource_generator()
-            self.update_previous_state()
-            prev_r = self.previous_resources
-            curr_r = {resource.uri: resource for count, resource in resource_generator(resource_metadata)}
-            created = [r for r in curr_r.values() if r.uri not in prev_r]
-            updated = [r for r in curr_r.values() if r.uri in prev_r and r.md5 != prev_r[r.uri].md5]
-            deleted = [r for r in prev_r.values() if r.uri not in curr_r]
-            unchang = [r for r in curr_r.values() if r.uri in prev_r and r.md5 == prev_r[r.uri].md5]
-
-            # remove lastmod from deleted resource metadata
-            for resource in deleted:
-                resource.lastmod = None
+            change_generator = self.resource_generator()
+            changes = [change for count, change in change_generator(resource_metadata)]
+            created = [c for c in changes if c.change == 'created']
+            updated = [c for c in changes if c.change == 'updated']
+            deleted = [c for c in changes if c.change == 'deleted']
 
             num_created = len(created)
             num_updated = len(updated)
             num_deleted = len(deleted)
             tot_changes = num_created + num_updated + num_deleted
             self.observers_inform(self, ExecutorEvent.found_changes, created=num_created, updated=num_updated,
-                                  deleted=num_deleted, unchanged=len(unchang))
-            all_changes = {"created": created, "updated": updated, "deleted": deleted}
+                                  deleted=num_deleted)
 
             ordinal = self.find_ordinal(Capability.changelist.name)
 
@@ -131,23 +112,20 @@ class ChangeListExecutor(Executor, metaclass=ABCMeta):
                     ordinal += 1
                     resource_count = 0
 
-            for kv in all_changes.items():
-                for resource in kv[1]:
-                    if changelist is None:
-                        changelist = ChangeList()
-                        changelist.md_from = self.date_changelist_from
+            for change in changes:
+                if changelist is None:
+                    changelist = ChangeList()
+                    changelist.md_from = self.date_changelist_from
 
-                    resource.change = kv[0] # type of change: created, updated or deleted
-                    resource.md_datetime = self.date_start_processing
-                    changelist.add(resource)
-                    resource_count += 1
+                changelist.add(change)
+                resource_count += 1
 
-                    # under conditions: yield the current changelist
-                    if resource_count % self.param.max_items_in_list == 0:
-                        ordinal += 1
-                        sitemap_data = self.finish_sitemap(ordinal, changelist)
-                        yield sitemap_data, changelist
-                        changelist = None
+                # under conditions: yield the current changelist
+                if resource_count % self.param.max_items_in_list == 0:
+                    ordinal += 1
+                    sitemap_data = self.finish_sitemap(ordinal, changelist)
+                    yield sitemap_data, changelist
+                    changelist = None
 
             # under conditions: yield the current and last changelist
             if changelist and tot_changes > 0:
