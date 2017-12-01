@@ -88,22 +88,15 @@ class ChangeListExecutor(Executor, metaclass=ABCMeta):
     def changelist_generator(self, resource_metadata: [Resource]) -> iter:
 
         def generator(changelist=None) -> [SitemapData, ChangeList]:
-            change_generator = self.resource_generator()
-            changes = [change for count, change in change_generator(resource_metadata)]
-            created = [c for c in changes if c.change == 'created']
-            updated = [c for c in changes if c.change == 'updated']
-            deleted = [c for c in changes if c.change == 'deleted']
-
-            num_created = len(created)
-            num_updated = len(updated)
-            num_deleted = len(deleted)
-            tot_changes = num_created + num_updated + num_deleted
-            self.observers_inform(self, ExecutorEvent.found_changes, created=num_created, updated=num_updated,
-                                  deleted=num_deleted)
-
             ordinal = self.find_ordinal(Capability.changelist.name)
 
             resource_count = 0
+
+            num_created = 0
+            num_updated = 0
+            num_deleted = 0
+            tot_changes = 0
+
             if changelist:
                 ordinal -= 1
                 resource_count = len(changelist)
@@ -112,10 +105,20 @@ class ChangeListExecutor(Executor, metaclass=ABCMeta):
                     ordinal += 1
                     resource_count = 0
 
-            for change in changes:
+            change_generator = self.resource_generator()
+            for count, change in change_generator(resource_metadata):
                 if changelist is None:
                     changelist = ChangeList()
                     changelist.md_from = self.date_changelist_from
+
+                if change.change == 'created':
+                    num_created += 1
+                elif change.change == 'updated':
+                    num_updated += 1
+                elif change.change == 'deleted':
+                    num_deleted += 1
+
+                tot_changes += 1
 
                 changelist.add(change)
                 resource_count += 1
@@ -132,6 +135,9 @@ class ChangeListExecutor(Executor, metaclass=ABCMeta):
                 ordinal += 1
                 sitemap_data = self.finish_sitemap(ordinal, changelist)
                 yield sitemap_data, changelist
+
+            self.observers_inform(self, ExecutorEvent.found_changes, created=num_created, updated=num_updated,
+                                  deleted=num_deleted)
 
         return generator
 
