@@ -71,8 +71,12 @@ class ChangeListExecutor(Executor, metaclass=ABCMeta):
             self.previous_resources = {}
 
             # search for resourcelists
-            self.resourcelist_files = sorted(glob(self.param.abs_metadata_path("resourcelist_*.xml")))
-            for rl_file_name in self.resourcelist_files:
+            self.resourcelist_files = sorted(glob(self.param.abs_metadata_path("resourcelist-index.xml")))
+            if len(self.resourcelist_files) == 0:
+                self.resourcelist_files = sorted(glob(self.param.abs_metadata_path("resourcelist_*.xml")))
+
+            if len(self.resourcelist_files) > 0:
+                rl_file_name = self.resourcelist_files[0]
                 resourcelist = ResourceList()
                 with open(rl_file_name, "r", encoding="utf-8") as rl_file:
                     sm = Sitemap()
