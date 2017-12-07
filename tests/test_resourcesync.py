@@ -11,7 +11,7 @@ import os
 from resourcesync.parameters.parameters import ParameterUtils
 
 
-class TestReSync(ResourceSync):
+class TestResources(ResourceSync):
     def get_resource_list(self):
         url = "http://www.resourcesync.org"
         m = md5()
@@ -27,6 +27,22 @@ class TestReSync(ResourceSync):
         return [rm]
 
 
+class TestChanges(ResourceSync):
+    def get_resource_list(self):
+        url = "http://www.resourcesync.org"
+        m = md5()
+        m.update(url.encode("utf8"))
+
+        rm = Resource(
+            uri=url,
+            lastmod="2016-10-01",
+            md5=m.hexdigest(),
+            length=20,
+            mime_type="application/xml",
+            change="updated"
+        )
+        return [rm]
+
 eg_gen = EgGenerator()
 
 
@@ -39,17 +55,17 @@ class ResourceSyncTest(unittest.TestCase):
             pass
 
     def test_resourcelist(self):
-        rs = TestReSync(generator=eg_gen, strategy=0,
+        rs = TestResources(generator=eg_gen, strategy=0,
                         metadata_dir="test_md")
         rs.execute()
 
     def test_newchangelist(self):
-        rs = TestReSync(generator=eg_gen, strategy=1,
+        rs = TestChanges(generator=eg_gen, strategy=1,
                         metadata_dir="test_md")
         rs.execute()
 
     def test_incchangelist(self):
-        rs = TestReSync(generator=eg_gen, strategy=2,
+        rs = TestChanges(generator=eg_gen, strategy=2,
                         metadata_dir="test_md")
         rs.execute()
 

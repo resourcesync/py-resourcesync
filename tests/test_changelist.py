@@ -26,7 +26,8 @@ class ChangeGenerator(Generator):
             lastmod="2017-06-14",
             md5=m.hexdigest(),
             length=len(body),
-            mime_type="application/xml"
+            mime_type="application/xml",
+            change="updated"
         )
         return [rm]
 
