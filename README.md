@@ -119,12 +119,6 @@ Here is a code sample that calls the generator with the appropriate strategy par
                   is_saving_sitemaps=True)
 ````
 
-Now the generated ResourceSync documents will be stored in 
-`/var/metadata/resourcesync`.
-
-A brief explanation of all the available parameters are provided in the 
-Parameters section below. 
-
 
 ## Architecture Overview
 
