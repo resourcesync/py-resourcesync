@@ -94,7 +94,7 @@ A brief explanation of all the available parameters are provided in the
 Parameters section below.
 
 ### About Resourcedump and Changedump strategies
-The implementations for the strategies `resourcedump` and `changedump` are new, and still under review, but are provided for test purposes. They behave in the same fashion as resourcelist and changelist, as described above, and the implementations conform to a subset of the requirements detailed in the ResoruceSync Framework specification. Internally, resourcedump corresponds to strategy value "3" and changedump is stategy value "4". Here is a code excerpt that illustrates how to use the resourcedump strategy, which results in a call to the new `ResourceDumpExecutor` class and subsequently, the generation of one or more zipped files containing a collection of assets and a manifest:
+The implementations for the strategies `resourcedump` and `changedump` are new, and still under review, but are provided for test purposes. They behave in the same fashion as `resourcelist` and `changelist`, as described above, and the implementations conform to a subset of the requirements detailed in the ResourceSync Framework specification. Internally, `resourcedump` corresponds to strategy value "3" and `changedump` is stategy value "4". Here is a code excerpt that illustrates how to use the `resourcedump` strategy, which results in a call to the new `ResourceDumpExecutor` class and subsequently, the generation of one or more `.zip` files each of which contains a collection of assets together with a `manifest.xml` file:
 
 ```python
 >>> from resourcesync.resourcesync import ResourceSync
