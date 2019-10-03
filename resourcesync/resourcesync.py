@@ -108,6 +108,9 @@ from resourcesync.utils.observe import Observable
 from resourcesync.rsxml.rsxml import RsXML
 from resourcesync.parameters.enum import Strategy
 from resourcesync.executor.resourcelist import ResourceListExecutor
+from resourcesync.executor.resourcedump import ResourceDumpExecutor
+from resourcesync.executor.changedump import ChangeDumpExecutor
+from resourcesync.executor.changedump import NewChangeDumpExecutor
 from resourcesync.executor.changelist import IncrementalChangeListExecutor, NewChangeListExecutor
 from resourcesync.core.generator import Generator
 from resourcesync.parameters.parameters import Parameters
@@ -145,10 +148,14 @@ class ResourceSync(Observable):
         executor = None
         if self.params.strategy == Strategy.resourcelist:
             executor = ResourceListExecutor(parameters=self.params)
+        elif self.params.strategy == Strategy.resourcedump:
+            executor = ResourceDumpExecutor(parameters=self.params)
         elif self.params.strategy == Strategy.new_changelist:
             executor = NewChangeListExecutor(parameters=self.params)
         elif self.params.strategy == Strategy.inc_changelist:
             executor = IncrementalChangeListExecutor(parameters=self.params)
+        elif self.params.strategy == Strategy.changedump:
+            executor = ChangeDumpExecutor(parameters=self.params)
         else:
             raise NotImplementedError("Strategy %s not implemented" % self.params.strategy)
 
