@@ -85,6 +85,7 @@ and the `metadata_dir` parameters can be used to change these.
                       resource_dir="/var/metadata/",
                       metadata_dir="resourcesync")
 >>> rs.execute()
+````
 
 Now the generated ResourceSync documents will be stored in
 `/var/metadata/resourcesync`.
@@ -123,7 +124,6 @@ Now the generated ResourceSync documents will be stored in
 
 A brief explanation of all the available parameters are provided in the 
 Parameters section below. 
-
 
 
 ## Architecture Overview
