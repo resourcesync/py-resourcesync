@@ -70,22 +70,13 @@ The execute method will invoke the `generate()` method of the
 The library can be told what type of ResourceSync document to produce by 
 passing the name of the resource type to the parameter `strategy`. 
 The library currently supports 
-`resourcelist`, `new_changelist`, and `inc_changelist`.
-
-```python
->>> from resourcesync.resourcesync import ResourceSync
->>> from my_generator import MyGenerator
->>> my_generator = MyGenerator()
->>> rs = ResourceSync(generator=my_generator, 
-                      strategy="resourcelist")
->>> rs.execute()
-```
-
-By default, the generated resourcesync documents are saved in a folder 
+`resourcelist`, `new_changelist`, and `inc_changelist`, but now also included experimental support for `resourcedump` and `changedump` (described further below).
+ 
+By default, the generated resourcesync documents are saved in a folder
 called `metadata` in the home directory of the user. The `resource_dir`
-and the `metadata_dir` parameters can be used to change these. 
+and the `metadata_dir` parameters can be used to change these.
 
-```python
+````python
 >>> from resourcesync.resourcesync import ResourceSync
 >>> from my_generator import MyGenerator
 >>> my_generator = MyGenerator()
@@ -94,12 +85,46 @@ and the `metadata_dir` parameters can be used to change these.
                       resource_dir="/var/metadata/",
                       metadata_dir="resourcesync")
 >>> rs.execute()
+
+Now the generated ResourceSync documents will be stored in
+`/var/metadata/resourcesync`.
+
+A brief explanation of all the available parameters are provided in the
+Parameters section below.
+
+### About Resourcedump and Changedump strategies
+The implementations for the strategies `resourcedump` and `changedump` are new, and still under review, but are provided for test purposes. They behave in the same fashion as resourcelist and changelist, as described above, and the implementations conform to a subset of the requirements detailed in the ResoruceSync Framework specification. Internally, resourcedump corresponds to strategy value "3" and changedump is stategy value "4". Here is a code excerpt that illustrates how to use the resourcedump strategy, which results in a call to the new `ResourceDumpExecutor` class and subsequently, the generation of one or more zipped files containing a collection of assets and a manifest:
+
+```python
+>>> from resourcesync.resourcesync import ResourceSync
+>>> from my_generator import MyGenerator
+>>> my_generator = MyGenerator()
+>>> rs = ResourceSync(generator=my_generator, 
+                      strategy="resourcedump")
+>>> rs.execute()
 ```
+Here is a code sample that calls the generator with the appropriate strategy parameter for `resourcedump`:
+
+````python
+>>> strategy = 3
+>>>
+>>> rs = ResourceSync(generator=my_generator, strategy=strategy, resource_dir='{}/{}'.format(httpd_document_root, resource_dir),
+                  metadata_dir=collection_name,
+                  max_items_in_list=1000,
+                  is_saving_pretty_xml=True,
+                  pretty_xml=True,
+                  description_dir=httpd_document_root,
+                  url_prefix='{}/{}'.format(resourcesync_url, resource_dir),
+                  is_saving_sitemaps=True)
+````
+
 Now the generated ResourceSync documents will be stored in 
 `/var/metadata/resourcesync`.
 
 A brief explanation of all the available parameters are provided in the 
 Parameters section below. 
+
+
 
 ## Architecture Overview
 
