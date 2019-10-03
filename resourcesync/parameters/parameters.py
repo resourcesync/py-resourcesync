@@ -338,6 +338,8 @@ class Parameters(object):
         - ``0`` :attr:`~resourcesync.parameters.enum.Strategy.resourcelist` - new resourcelist: create new resourcelist(s)
         - ``1`` :attr:`~rspub.core.rs_enum.Strategy.new_changelist` - new changelist: create a new changelist on every execution
         - ``2`` :attr:`~rspub.core.rs_enum.Strategy.inc_changelist` - incremental changelist: add changes to an existing changelist
+        - ``3`` :attr:`~rspub.core.rs_enum.Strategy.changedump` - new changedump: create or update changedump on every execution
+        - ``4`` :attr:`~rspub.core.rs_enum.Strategy.resourcedump` - new resourcedump: create a new resourcedump on every execution
 
         If strategies new resourcelist or incremental changelist are chosen and there is no previous resourcelist
         found in the metadata directory the strategy :attr:`~rspub.core.rs_enum.Strategy.resourcelist` will be executed.

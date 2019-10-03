@@ -36,8 +36,20 @@ class Strategy(Enum):
     Add changes to an existing changelist. If no changelist exists, create a new one.
     If no resourcelist was found in the metadata directory switch to new resourcelist strategy.
     """
-    # resourcedump = 3 # not implemented
-    # changedump = 4 # not implemented
+
+    resourcedump = 3
+    """
+    ``3`` :samp:`New resourcedump {strategy}`
+
+    Create a new resourcedump every run.
+    """
+
+    changedump = 4
+    """
+    ``4`` :samp:`  changedump {strategy}`
+    Add changes to an existing changedump. If no changedump exists, create a new one.
+    If no resourcelist was found in the metadata directory switch to new resourcelist strategy.
+    """
 
     @staticmethod
     def names():
@@ -90,7 +102,6 @@ class Strategy(Enum):
 class Capability(Enum):
     """
     :samp:`Capabilities as defined in the ResourceSync Framework`
-
     """
     resourcelist = 0
     """
@@ -124,7 +135,6 @@ class Capability(Enum):
     """
     ``7`` :samp:`description`
     """
-
 
 class SelectMode(Enum):
     """

@@ -6,6 +6,7 @@
 import hashlib
 import mimetypes
 import time
+import os
 import urllib.parse
 import urllib.request
 from datetime import datetime
@@ -46,6 +47,16 @@ def w3c_datetime(i):
 def w3c_now():
     return w3c_datetime(datetime.now().timestamp())
 
+def file_modification_date(filename=''):
+  if filename =='':
+    str1 = time.asctime()
+  else:
+    str1 = time.ctime(os.path.getmtime(filename))
+  return str1
+
+def reformat_datetime(str1):
+  datetime_object = datetime.strptime(str1, '%a %b %d %H:%M:%S %Y')
+  return datetime_object.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def md5_for_file(filename, block_size=2**14):
     """Compute MD5 digest for a file
