@@ -26,17 +26,14 @@ class ResourceDumpExecutor(Executor):
         if self.param.is_saving_sitemaps:
             self.clear_metadata_dir()
 
-    def generate_rs_documents(self, resource_metadata: [Resource] ) -> [SitemapData, Resource]:
+    def generate_rs_documents(self, resource_metadata: [Resource] ) -> [Resource]:
         sitemap_data_iter = []
         rdumps_iter = []
         generator = self.resourcedump_generator(resource_metadata)
-        for sitemap_data, resource in generator():
-            sitemap_data_iter.append(sitemap_data)
+        for resource in generator():
             rdumps_iter.append(resource)
-        # self.create_index(sitemap_data_iter, rdumps_iter)
         self.create_index(rdumps_iter)
-
-        return sitemap_data_iter, rdumps_iter
+        return rdumps_iter
 
     def create_index(self, rdumps_iter: iter):
         if len(rdumps_iter) > 1:
@@ -82,13 +79,12 @@ class ResourceDumpExecutor(Executor):
                     doc_end = defaults.w3c_now()
                     resourcedump.md_completed = doc_end
                     d = Dump(resources = resourcedump)
-                    zipf = os.path.join('/tmp', "rd_" + str(ordinal) + ".zip")
+                    zipf = self.param.abs_metadata_path("rd_" + str(ordinal) + ".zip")
+
                     print (str(zipf))
                     d.write_zip(resources=resourcedump, dumpfile=zipf)
-                    # resourcedump = None
-                    sitemap_data = self.finish_sitemap(ordinal, resourcedump, doc_start=doc_start, doc_end=doc_end)
                     dumpResource = Resource(uri=str(zipf))
-                    yield sitemap_data, dumpResource
+                    yield dumpResource
                     resourcedump = None
 
 
@@ -98,11 +94,10 @@ class ResourceDumpExecutor(Executor):
                 doc_end = defaults.w3c_now()
                 resourcedump.md_completed = doc_end
                 d = Dump()
-                zipf = os.path.join('/tmp', "rd_" + str(ordinal) + ".zip")
+                zipf = self.param.abs_metadata_path("rd_" + str(ordinal) + ".zip")
                 print (str(zipf))
-                sitemap_data = self.finish_sitemap(ordinal, resourcedump, doc_start=doc_start, doc_end=doc_end)
                 dumpResource = Resource(uri=str(zipf))
-                yield sitemap_data, dumpResource
+                yield dumpResource
                 d.write_zip(resources=resourcedump, dumpfile=zipf)
        
         return generator
